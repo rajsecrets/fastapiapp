@@ -4,3 +4,4 @@ python-dotenv
 requests
 pymupdf
 pillow
+python-multipart
