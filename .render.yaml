@@ -2,10 +2,10 @@ services:
   - name: docverify-api
     type: web
     runtime: docker
-    repo: https://github.com/YOUR_GITHUB_USERNAME/docverify-ai
+    repo: https://github.com/rajsecrets/fastapiapp
     envVars:
       - key: GEMINI_API_KEY
-        sync: false  # Set in Render dashboard
+        sync: false  # Set this in the Render dashboard securely
     plan: free
     region: oregon
     dockerContext: .
