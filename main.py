@@ -1,6 +1,14 @@
-import os
-import uvicorn
-from api import app  # Import app from api.py
+from fastapi import FastAPI, UploadFile, File
+from api import process_uploaded_file
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"message": "Welcome to DocVerify AI API"}
+
+@app.post("/process/")
+async def process_file(file: UploadFile = File(...)):
+    """API to upload and process a document."""
+    result = await process_uploaded_file(file)
+    return result
