@@ -2,5 +2,5 @@ fastapi
 uvicorn
 python-dotenv
 requests
-pymupdf  # For PDF processing
-pillow  # For image handling
+pymupdf
+pillow
