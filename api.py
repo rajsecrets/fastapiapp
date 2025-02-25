@@ -11,9 +11,12 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY")
 GEMINI_MODEL = "gemini-1.5-flash"
 DOCUMENT_TYPES = ["Land Records", "Caste Certificates", "Property Registrations"]
 
-# Encode uploaded file
+# Encode uploaded file to base64
 async def encode_file(uploaded_file: UploadFile):
-    """Encode uploaded file to base64."""
+    """
+    Encode the uploaded file to a base64 string.
+    Supports PDFs and images.
+    """
     file_bytes = await uploaded_file.read()
     
     if uploaded_file.content_type == "application/pdf":
@@ -32,14 +35,27 @@ async def encode_file(uploaded_file: UploadFile):
 
 # Query Gemini API
 def query_gemini(prompt, image_b64=None):
-    """Send a request to the Gemini API and return the response."""
+    """
+    Send a request to the Gemini API and return its response.
+    """
     url = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
     parts = [{"text": prompt}]
     
     if image_b64:
-        parts.append({"inline_data": {"mime_type": "image/jpeg", "data": image_b64}})
+        parts.append({
+            "inline_data": {
+                "mime_type": "image/jpeg",
+                "data": image_b64
+            }
+        })
     
-    response = requests.post(url, json={"contents": [{"parts": parts}]}, headers={"Content-Type": "application/json"}, timeout=30)
+    response = requests.post(
+        url,
+        json={"contents": [{"parts": parts}]},
+        headers={"Content-Type": "application/json"},
+        timeout=30
+    )
+    
     if response.status_code != 200:
         return {"error": f"API request failed: {response.status_code}"}
     
@@ -48,17 +64,27 @@ def query_gemini(prompt, image_b64=None):
 
 # Process uploaded document
 async def process_uploaded_file(uploaded_file: UploadFile):
-    """Process the uploaded file and return analysis."""
+    """
+    Process the uploaded document:
+      - Encodes the file.
+      - Classifies the document.
+      - Extracts important details.
+      - Verifies authenticity.
+    Returns a dictionary with results.
+    """
     image_b64 = await encode_file(uploaded_file)
     if not image_b64:
         return {"error": "Unsupported file format"}
 
+    # Query for classification
     classify_prompt = f"Classify this document into: {', '.join(DOCUMENT_TYPES)}"
     doc_type = query_gemini(classify_prompt, image_b64)
 
+    # Query for details extraction
     extract_prompt = "Extract and organize important details (Names, Dates, ID numbers, Locations, Key terms)."
     details = query_gemini(extract_prompt, image_b64)
 
+    # Query for authenticity verification
     verify_prompt = "Analyze for tampering or forgery signs."
     verification = query_gemini(verify_prompt, image_b64)
 
