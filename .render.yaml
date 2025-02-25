@@ -1,0 +1,12 @@
+services:
+  - name: docverify-api
+    type: web
+    runtime: docker
+    repo: https://github.com/YOUR_GITHUB_USERNAME/docverify-ai
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false  # Set in Render dashboard
+    plan: free
+    region: oregon
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
